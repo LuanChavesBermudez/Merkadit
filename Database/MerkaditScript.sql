@@ -156,7 +156,7 @@ DELIMITER ;
 
 CALL randomizeUsers();
 
-INSERT INTO roles (roleName, isActive) VALUE ('Administrador', 1);
+INSERT INTO roles (roleName, isActive) VALUES ('Administrador', 1), ('Tenant', 1);
 INSERT INTO userRoles (userid, roleid, postTime, isActive) VALUE (1, 1, now(), 1);
 INSERT INTO userrolesperstores (storeid, userid, roleid, isActive, postTime)
 VALUES
@@ -346,9 +346,69 @@ VALUES
     ('Coffee Beans', 'Freshly roasted coffee beans', 30, '2025-04-02', 10),
     ('Pasta', 'Organic pasta made with whole wheat', 55, '2025-08-15', 10);
 
+CREATE TABLE productCost_mockup(
+	productCostID INT AUTO_INCREMENT PRIMARY KEY,
+    costValue FLOAT,
+    isCurrent BIT,
+    postTime DATETIME,
+    computer VARCHAR(20),
+    productID INT,
+    userID INT
+);
+INSERT INTO productCost_mockup (costValue, isCurrent, postTime, computer, productID, userID) VALUES
+	(450000, 1, '2025-06-01', 'AdminDesktop', 1, 1),
+	(650000, 1, '2025-05-15', 'AdminDesktop', 2, 1),
+	(120000, 1, '2025-07-10', 'AdminDesktop', 3, 1),
+	(180000, 1, '2025-08-05', 'AdminDesktop', 4, 1),
+	(250000, 1, '2025-04-20', 'AdminDesktop', 5, 1),
+	(350000, 1, '2025-06-10', 'AdminDesktop', 6, 1),
+	(280000, 1, '2025-07-25', 'AdminDesktop', 7, 1),
+	(150000, 1, '2025-05-18', 'AdminDesktop', 8, 1),
+	(130000, 1, '2025-03-22', 'AdminDesktop', 9, 1),
+	(110000, 1, '2025-04-30', 'AdminDesktop', 10, 1),
+	(9000, 1, '2025-04-30', 'AdminDesktop', 11, 1),
+	(20000, 1, '2025-03-10', 'AdminDesktop', 12, 1),
+	(45000, 1, '2025-07-01', 'AdminDesktop', 13, 1),
+	(30000, 1, '2025-05-18', 'AdminDesktop', 14, 1),
+	(60000, 1, '2025-08-20', 'AdminDesktop', 15, 1),
+	(280000, 1, '2025-06-12', 'AdminDesktop', 16, 1),
+	(450000, 1, '2025-07-15', 'AdminDesktop', 17, 1),
+	(90000, 1, '2025-08-10', 'AdminDesktop', 18, 1),
+	(320000, 1, '2025-05-25', 'AdminDesktop', 19, 1),
+	(100000, 1, '2025-04-05', 'AdminDesktop', 20, 1),
+	(15000, 1, '2025-07-12', 'AdminDesktop', 21, 1),
+	(25000, 1, '2025-06-15', 'AdminDesktop', 22, 1),
+	(30000, 1, '2025-04-10', 'AdminDesktop', 23, 1),
+	(70000, 1, '2025-05-05', 'AdminDesktop', 24, 1),
+	(12000, 1, '2025-08-25', 'AdminDesktop', 25, 1),
+	(8000, 1, '2025-03-01', 'AdminDesktop', 26, 1),
+	(12000, 1, '2025-05-30', 'AdminDesktop', 27, 1),
+	(10000, 1, '2025-04-15', 'AdminDesktop', 28, 1),
+	(9000, 1, '2025-06-05', 'AdminDesktop', 29, 1),
+	(7000, 1, '2025-07-01', 'AdminDesktop', 30, 1),
+	(25000, 1, '2025-05-05', 'AdminDesktop', 31, 1),
+	(12000, 1, '2025-06-10', 'AdminDesktop', 32, 1),
+	(18000, 1, '2025-04-25', 'AdminDesktop', 33, 1),
+	(22000, 1, '2025-07-20', 'AdminDesktop', 34, 1),
+	(9000, 1, '2025-03-15', 'AdminDesktop', 35, 1),
+	(7000, 1, '2025-06-01', 'AdminDesktop', 36, 1),
+	(6000, 1, '2025-05-25', 'AdminDesktop', 37, 1),
+	(25000, 1, '2025-07-15', 'AdminDesktop', 38, 1),
+	(15000, 1, '2025-04-05', 'AdminDesktop', 39, 1),
+	(3500, 1, '2025-03-25', 'AdminDesktop', 40, 1),
+	(45000, 1, '2025-06-15', 'AdminDesktop', 41, 1),
+	(12000, 1, '2025-07-10', 'AdminDesktop', 42, 1),
+	(280000, 1, '2025-08-20', 'AdminDesktop', 43, 1),
+	(15000, 1, '2025-05-12', 'AdminDesktop', 44, 1),
+	(9000, 1, '2025-04-18', 'AdminDesktop', 45, 1),
+	(14000, 1, '2025-06-20', 'AdminDesktop', 46, 1),
+	(5500, 1, '2025-07-05', 'AdminDesktop', 47, 1),
+	(4500, 1, '2025-05-15', 'AdminDesktop', 48, 1),
+	(16000, 1, '2025-04-02', 'AdminDesktop', 49, 1),
+	(5000, 1, '2025-08-15', 'AdminDesktop', 50, 1);
 
 DELIMITER //
-CREATE PROCEDURE randomizarInventario()
+CREATE PROCEDURE randomizeInventory()
 BEGIN
 	DECLARE vRandomBusinessID INT;
 	DECLARE vRandomProductID INT;
@@ -356,14 +416,14 @@ BEGIN
 	DECLARE i INT DEFAULT 0;
 	DECLARE j INT DEFAULT 0;
 	
-	seleccionNegocios: WHILE i < 3 DO
+	WHILE i < 3 DO
 		SELECT businessID FROM businesses
 		WHERE businessID NOT IN (SELECT businessID FROM products)
         ORDER BY RAND() LIMIT 1 INTO vRandomBusinessID;
 		
-		seleccionProductos: WHILE j < 3 DO
+		WHILE j < 3 DO
 			SELECT productID FROM products_mockup
-			WHERE productID NOT IN (SELECT productID FROM products)
+			WHERE productName NOT IN (SELECT productName FROM products)
 			ORDER BY RAND() LIMIT 1 INTO vRandomProductID;
             
 			SET vRandomStoreID = FLOOR(RAND() * 3);
@@ -372,14 +432,134 @@ BEGIN
 			SELECT productName, productDescription, quantity, arrivalDate, categoryID, 1, 1, 1, vRandomBusinessID
 			FROM products_mockup
 			WHERE productID = vRandomProductID;
+            
+            INSERT INTO productCostHistory (costValue, isCurrent, postTime, computer, productID, userID)
+            SELECT costValue, isCurrent, postTime, computer, last_insert_id(), userID
+            FROM productCost_mockup
+            WHERE productID = vRandomProductID;
 			
 			SET j = j + 1;
-		END WHILE seleccionProductos;
+		END WHILE;
         
 		SET i = i + 1;
         SET j = 0;
-	END WHILE seleccionNegocios;
+	END WHILE;
 END //
 DELIMITER ;
 
-call randomizarInventario();
+CALL randomizeInventory();
+
+INSERT INTO logSources (logSourceName) VALUE ('Ventas');
+INSERT INTO logLevels (logLevelDescription) VALUES ('Info'), ('Warning'), ('Error');
+INSERT INTO logTypes (logTypeName) VALUES ('Factura');
+
+
+DELIMITER //
+CREATE PROCEDURE registerSale(pProductName VARCHAR(40), pStoreName VARCHAR(25), 
+				 pQuantitySold INT, pAmountPaid FLOAT, pPaymentMethod VARCHAR(50), pPostTime DATETIME,
+                 pRefid BIGINT, pInvoiceNumber BIGINT, pCustomer VARCHAR(50), pDiscounts FLOAT)
+this_procedure: BEGIN
+    DECLARE vChecksumInvoice VARBINARY(32);
+    DECLARE vChecksumDetail VARBINARY(32);
+    DECLARE vChecksumLog VARBINARY(32);
+    DECLARE vProductID INT;
+    DECLARE vProductCostID INT;
+    DECLARE vProductQuantity INT;
+    
+    SELECT productID, quantity FROM products WHERE productName = pProductName INTO vProductID, vProductQuantity;
+    SELECT productCostID FROM productCostHistory WHERE productID = vProductID INTO vProductCostID;
+    
+    SET vChecksumInvoice = MD5(CONCAT(pPostTime, pInvoiceNumber, pAmountPaid));
+    SET vChecksumDetail = MD5(CONCAT(pQuantitySold, vProductID, vProductCostID));
+    SET vChecksumLog = MD5(CONCAT(pRefid, pPostTime));
+    
+    IF (vProductQuantity < pQuantitySold) THEN
+		INSERT INTO logs (logDescription, computer, refid, postTime, checksum, logTypeID, logLevelID, logSourceID, userID)
+			value ('Facturacion de venta fallida', 'AdminDesktop', pRefid, pPostTime, vChecksumLog, 1, 3, 1, 1);
+		 LEAVE this_procedure;
+    END IF;
+    
+    INSERT INTO invoices(postTime, invoiceNumber, client, computer, discount, taxApplied, taxAmount, checksum, total, paymentMethod, userID)
+    value
+		(pPostTime, pInvoiceNumber, pCustomer, 'AdminDesktop', pDiscounts, 0.04, pAmountPaid * taxApplied, vChecksumInvoice, pAmountPaid, pPaymentMethod, 1);
+        
+	INSERT INTO invoiceDetails (quantity, computer, checksum, invoiceID, productID, productCostID, userID)
+    value
+		(pQuantitySold, 'AdminDesktop', vChecksumDetail, last_insert_id(), vProductID, vProductCostID, 1);
+        
+	INSERT INTO logs (logDescription, computer, refid, postTime, checksum, logTypeID, logLevelID, logSourceID, userID)
+    value ('Facturacion de venta exitosa', 'AdminDesktop', pRefid, pPostTime, vChecksumLog, 1, 1, 1, 1);
+    
+    UPDATE products
+    SET quantity = quantity - pQuantitySold
+    WHERE productID = vProductID;
+END //
+DELIMITER ;
+
+CREATE TABLE paymentMethods_mockup(
+	paymentMethodID INT AUTO_INCREMENT PRIMARY KEY,
+    paymentMethodName VARCHAR(30)
+);
+
+INSERT INTO paymentMethods_mockup (paymentMethodName)
+VALUES
+	('Mastercard'),
+    ('Efectivo'),
+    ('SINPE Movil'),
+    ('Visa');
+
+DELIMITER //
+CREATE PROCEDURE randomizePurchases()
+BEGIN
+    DECLARE vStartDate DATETIME;
+    DECLARE vRandomProductName VARCHAR(40);
+    DECLARE vRandomProductID INT;
+	DECLARE vMonthQuantity INT DEFAULT 4;
+    DECLARE vRandomDate DATETIME;
+    DECLARE vRandomPurchaseAmount INT;
+    DECLARE vRandomStoreName VARCHAR(25);
+    DECLARE vProductCost FLOAT;
+    DECLARE vAmountSold INT;
+    DECLARE vClientName VARCHAR(60);
+    DECLARE vPaymentMethod VARCHAR(30);
+    
+    SET vStartDate = DATE(date_sub(now(), INTERVAL vMonthQuantity MONTH));
+    
+    WHILE vMonthQuantity > 0 DO
+		SET vRandomPurchaseAmount = FLOOR(rand() * (70 - 50) + 50);
+        
+        WHILE vRandomPurchaseAmount > 0 DO
+			SET vRandomDate = DATE(DATE_ADD(vStartDate, INTERVAL FLOOR(RAND()*30) DAY));
+            
+            SELECT productName, productID FROM products
+			WHERE quantity > 0
+			ORDER BY RAND() LIMIT 1 INTO vRandomProductName, vRandomProductID;
+            
+            SELECT storeName FROM stores
+			ORDER BY RAND() LIMIT 1 INTO vRandomStoreName;
+            
+            SELECT paymentMethodName FROM paymentMethods_mockup
+            ORDER BY RAND() LIMIT 1 INTO vPaymentMethod;
+            
+            SET vAmountSold = FLOOR(RAND()*3) + 1;
+            
+            SELECT costValue FROM productCostHistory
+            WHERE productID = vRandomProductID
+            INTO vProductCost;
+            
+            SELECT CONCAT(firstName, ' ', lastName) FROM users
+            ORDER BY RAND() LIMIT 1 INTO vClientName;
+            
+            CALL registerSale(vRandomProductName, vRandomStoreName, vAmountSold, vAmountSold * vProductCost,
+							  vPaymentMethod, vRandomDate, 100000 + (vRandomProductID * 1000), 100000 + (vRandomProductID * 1000),
+                              vClientName, 0.0);
+            
+			SET vRandomPurchaseAmount = vRandomPurchaseAmount - 1;
+        END WHILE;
+        SET vStartDate = DATE(DATE_ADD(vStartDate, INTERVAL 1 MONTH));
+		SET vMonthQuantity = vMonthQuantity - 1;
+    END WHILE;
+END //
+DELIMITER ;
+CALL randomizePurchases();
+select * from invoices;

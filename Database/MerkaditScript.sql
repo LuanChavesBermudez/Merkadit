@@ -465,6 +465,9 @@ this_procedure: BEGIN
     DECLARE vProductID INT;
     DECLARE vProductCostID INT;
     DECLARE vProductQuantity INT;
+    DECLARE vPartialCost FLOAT;
+    DECLARE vFinalCost FLOAT;
+    DECLARE vTaxApplied FLOAT DEFAULT 0.04;
     
     SELECT productID, quantity FROM products WHERE productName = pProductName INTO vProductID, vProductQuantity;
     SELECT productCostID FROM productCostHistory WHERE productID = vProductID INTO vProductCostID;
@@ -479,9 +482,13 @@ this_procedure: BEGIN
 		 LEAVE this_procedure;
     END IF;
     
+    SET vFinalCost = pAmountPaid * pQuantitySold;
+    SET vFinalCost = vFinalCost - (vFinalCost * pDiscounts);
+    SET vPartialCost = vFinalCost;
+    SET vFinalCost = vFinalCost + (vFinalCost * vTaxApplied);
     INSERT INTO invoices(postTime, invoiceNumber, client, computer, discount, taxApplied, taxAmount, checksum, total, paymentMethod, userID)
     value
-		(pPostTime, pInvoiceNumber, pCustomer, 'AdminDesktop', pDiscounts, 0.04, pAmountPaid * taxApplied, vChecksumInvoice, pAmountPaid, pPaymentMethod, 1);
+		(pPostTime, pInvoiceNumber, pCustomer, 'AdminDesktop', pDiscounts, vTaxApplied, vPartialCost * vTaxApplied, vChecksumInvoice, vFinalCost, pPaymentMethod, 1);
         
 	INSERT INTO invoiceDetails (quantity, computer, checksum, invoiceID, productID, productCostID, userID)
     value
@@ -519,6 +526,7 @@ BEGIN
     DECLARE vRandomPurchaseAmount INT;
     DECLARE vRandomStoreName VARCHAR(25);
     DECLARE vProductCost FLOAT;
+    DECLARE vRandomDiscount FLOAT;
     DECLARE vAmountSold INT;
     DECLARE vClientName VARCHAR(60);
     DECLARE vPaymentMethod VARCHAR(30);
@@ -550,9 +558,11 @@ BEGIN
             SELECT CONCAT(firstName, ' ', lastName) FROM users
             ORDER BY RAND() LIMIT 1 INTO vClientName;
             
-            CALL registerSale(vRandomProductName, vRandomStoreName, vAmountSold, vAmountSold * vProductCost,
+            SET vRandomDiscount = ROUND(RAND()*51 / 100, 1);
+            
+            CALL registerSale(vRandomProductName, vRandomStoreName, vAmountSold, vProductCost,
 							  vPaymentMethod, vRandomDate, 100000 + (vRandomProductID * 1000), 100000 + (vRandomProductID * 1000),
-                              vClientName, 0.0);
+                              vClientName, vRandomDiscount);
             
 			SET vRandomPurchaseAmount = vRandomPurchaseAmount - 1;
         END WHILE;
